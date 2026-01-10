@@ -4,7 +4,7 @@
 int main() {
 
   sfs_object obj;
-  assert(sfs_open(&obj, "test.kyfs") == SFS_OK);
+  assert(sfs_open(&obj, SFS_STR("test.kyfs")) == SFS_OK);
 
   return 0;
 }

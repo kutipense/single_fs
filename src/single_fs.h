@@ -1,7 +1,28 @@
 #ifndef SINGLE_FS
 #define SINGLE_FS
 
+#include <stddef.h>
 #include <stdint.h>
+
+/* Utils*/
+
+typedef struct sfs_str {
+  /* null terminated string */
+  char *ptr;
+
+  /* str len excluding the null terminator*/
+  size_t len;
+
+  /* memory size including the null terminator */
+  size_t size;
+} sfs_str;
+
+#define SFS_STR(str)                                                                                                   \
+  ((sfs_str){                                                                                                          \
+      .ptr = str,                                                                                                      \
+      .len = sizeof(str) - 1,                                                                                          \
+      .size = sizeof(str),                                                                                             \
+  })
 
 /* 8 bytes total */
 typedef struct sfs_extent_header {
@@ -175,7 +196,34 @@ typedef struct sfs_stats {
 
 } sfs_stats;
 
+typedef struct sfs_file {
+  /* file pointer */
+  int mf_fd;
+
+  /* file size */
+  uint64_t mf_size;
+
+  /* available capacity */
+  /* hoping this will always be same to the size */
+  /* maybe I'm wrong */
+  uint64_t mf_capacity;
+
+  /* write buffer */
+  struct {
+    /* buffer pointer, most probably allocated */
+    uint8_t *ptr;
+
+    /* current buffer cursor */
+    uint64_t len;
+
+    /* total capacity of the buffer, usually 8192 */
+    uint64_t capacity;
+  } mf_buffer;
+} sfs_fs_file;
+
 typedef struct sfs_object {
+  sfs_file o_file;
+
   sfs_header o_header;
   sfs_super_block o_super_block;
 } sfs_object;
@@ -189,8 +237,12 @@ enum SFS_ERROR_CODES {
   SFS_NOT_OK,
   SFS_OK,
   SFS_CANT_OPEN,
-  SFS_CANT_CREATE,
   SFS_CANT_SEEK,
+
+  // FILE ERROR
+  SFS_FILE_CANT_CREATE,
+  SFS_FILE_CANT_STAT,
+  SFS_FILE_CANT_ALLOCATE_BUFFER,
 
   // WRITE ERROR
   SFS_CANT_WRITE,
@@ -206,12 +258,19 @@ enum SFS_ERROR_CODES {
   SFS_CORRUPTED,
   SFS_CORRUPTED_HEADER,
   SFS_CORRUPTED_SUPER_BLOCK,
+
+  // don't know what to name TODO
+  SFS_BAD_ARGUMENT,
 };
 
 // API
 
+// FS FILE API
+int sfs_fs_file_open(sfs_fs_file *mf, sfs_str path);
+int sfs_fs_write_buffered(sfs_fs_file *mf, void *ptr, size_t size, size_t n);
+
 // OBJECT API
-int sfs_open(sfs_object *obj, const char *path);
+int sfs_open(sfs_object *obj, sfs_str path);
 int sfs_close(sfs_object *obj);
 
 int sfs_compact(sfs_object *obj);
