@@ -110,112 +110,175 @@ int sfs_open(sfs_object *obj, sfs_str path) {
   error = sfs_fs_file_open(&fs_file, path);
   if (error != SFS_OK) { return error; }
 
-  if (fs_file.mf_size < (sizeof(sfs_header) + sizeof(sfs_super_block))) {
-    // this file is corrupted or empty
+  //   if (fs_file.mf_size < (sizeof(sfs_header) + sizeof(sfs_super_block))) {
+  //     // this file is corrupted or empty
 
-    // write header
-    header = DEFAULT_HEADER;
+  //     // write header
+  //     header = DEFAULT_HEADER;
 
-    if (fwrite(&header, 1, sizeof(sfs_header), f) != sizeof(sfs_header)) {
-      error = SFS_CANT_WRITE;
-      goto cleanup;
+  //     if (fwrite(&header, 1, sizeof(sfs_header), f) != sizeof(sfs_header)) {
+  //       error = SFS_CANT_WRITE;
+  //       goto cleanup;
+  //     }
+
+  //     // write super block
+  //     super_block = DEFAULT_SUPER_BLOCK;
+  //     if (fwrite(&super_block, 1, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
+  //       error = SFS_CANT_WRITE_SUPER_BLOCK;
+  //       goto cleanup;
+  //     }
+
+  //     // write ...
+
+  //     // write ...
+  //   }
+
+  //   if ((f = fopen(path.ptr, "rb+")) == NULL) {
+  //     // try creating the file
+
+  //     if ((f = fopen(path.ptr, "wb+")) == NULL) {
+  //       error = SFS_FILE_CANT_CREATE;
+  //       goto done;
+  //     }
+
+  //     // write header
+  //     header = DEFAULT_HEADER;
+
+  //     if (fwrite(&header, 1, sizeof(sfs_header), f) != sizeof(sfs_header)) {
+  //       error = SFS_CANT_WRITE;
+  //       goto cleanup;
+  //     }
+
+  //     // write super block
+  //     super_block = DEFAULT_SUPER_BLOCK;
+  //     if (fwrite(&super_block, 1, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
+  //       error = SFS_CANT_WRITE_SUPER_BLOCK;
+  //       goto cleanup;
+  //     }
+
+  //     // write ...
+
+  //     // write ...
+  //   } else {
+  //     rewind(f);
+
+  //     // read header
+  //     if (fread(&header, 1L, sizeof(sfs_header), f) != sizeof(sfs_header)) {
+  //       error = SFS_CANT_READ_HEADER;
+  //       goto cleanup;
+  //     }
+
+  //     // validate header, maybe check version, don't know for now! TODO
+  //     if (header.h_format_magic_number != DEFAULT_HEADER.h_format_magic_number ||
+  //         header.h_block_size != DEFAULT_HEADER.h_block_size ||
+  //         header.h_filename_limit != DEFAULT_HEADER.h_filename_limit) {
+  //       error = SFS_CORRUPTED_HEADER;
+  //       goto cleanup;
+  //     }
+
+  //     // read superblock
+  //     if (fread(&super_block, 1L, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
+  //       error = SFS_CANT_READ_SUPER_BLOCK;
+  //       goto cleanup;
+  //     }
+
+  //     // validate super_block, don't know for now! HARD TODO
+  //     if (0) {
+  //       error = SFS_CORRUPTED_SUPER_BLOCK;
+  //       goto cleanup;
+  //     }
+
+  //     // read inode btree TODO
+
+  //     // read ...
+
+  //     // read ...
+  //   }
+
+  //   // fill obj
+  //   // obj->o_file.mf_fp = f;
+  //   // obj->o_file.mf_size = ftello(f);
+  //   // HARD TODO round up
+  //   // obj->o_file.mf_capacity = lround_up(obj->o_file.mf_size, header.h_block_size);
+  //   // obj->o_file.capacity = obj->o_file.size >= header.h_block_size ? obj->o_file.size : header.h_block_size;
+  //   // obj->o_file.mf_map = memory_map_object_file(obj->o_file.mf_fp, obj->o_file.mf_capacity);
+  //   // HARD TODO
+  //   // obj->o_file.capacity = 0;
+  //   // obj->o_file.memory = 0;
+
+  //   obj->o_header = header;
+  //   obj->o_super_block = super_block;
+
+  //   create_inode_block(obj);
+
+  //   error = SFS_OK;
+
+  // cleanup:
+  //   if (f != NULL) { fclose(f); }
+
+  // done:
+  //   return error;
+}
+
+int sfs_get_child_inode(sfs_object *obj, sfs_inode *parent, sfs_inode *inode_out) {
+
+  //
+  return SFS_INODE_NOT_EXIST;
+}
+
+int sfs_is_dir_exists(sfs_object *obj, sfs_inode *dir) {
+
+  //
+  return 0;
+}
+
+int sfs_mkdir(sfs_object *obj, sfs_str path, int recursive) {
+
+  // check if dir exists
+
+  sfs_inode parent_inode; // = root_inode; // HARD TODO
+
+  char *end_ptr = path.ptr + path.len;
+  char *prev_token = path.ptr;
+
+  sfs_str directory_name = {0};
+
+  while (prev_token < end_ptr) {
+    char *curr_token = memchr(prev_token, '/', end_ptr - prev_token + 1);
+    if (!curr_token || curr_token >= end_ptr) { curr_token = end_ptr; }
+
+    sfs_str directory_name = {
+        .ptr = prev_token,
+        .len = curr_token - prev_token,
+        .size = directory_name.len,
+    };
+
+    if (directory_name.len > 0) {
+      int error = sfs_get_child_inode(obj, &parent_inode, &parent_inode);
+
+      if (error == SFS_INODE_NOT_EXIST) {
+        if (curr_token == end_ptr || recursive) {
+          // create inode and set dir
+        } else {
+          // hopefully no free or release here // TODO
+          return SFS_INODE_CANT_CREATE;
+        }
+      } else {
+        // inode already exist
+        if (parent_inode.i_flags.type != SFS_DIRECTORY) { return SFS_EXPECTED_DIR_FOUND_FILE; }
+        if (curr_token == end_ptr) { return SFS_INODE_ALREADY_EXISTS; }
+        // else continue, no problem for intermediary folders
+        _exit(-1); // HARD TODO
+      }
     }
 
-    // write super block
-    super_block = DEFAULT_SUPER_BLOCK;
-    if (fwrite(&super_block, 1, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
-      error = SFS_CANT_WRITE_SUPER_BLOCK;
-      goto cleanup;
-    }
+    write(1, directory_name.ptr, directory_name.len);
+    write(1, "\n", 1);
 
-    // write ...
-
-    // write ...
+    prev_token = curr_token + 1;
   }
 
-  if ((f = fopen(path.ptr, "rb+")) == NULL) {
-    // try creating the file
+  // if not create it
 
-    if ((f = fopen(path.ptr, "wb+")) == NULL) {
-      error = SFS_FILE_CANT_CREATE;
-      goto done;
-    }
-
-    // write header
-    header = DEFAULT_HEADER;
-
-    if (fwrite(&header, 1, sizeof(sfs_header), f) != sizeof(sfs_header)) {
-      error = SFS_CANT_WRITE;
-      goto cleanup;
-    }
-
-    // write super block
-    super_block = DEFAULT_SUPER_BLOCK;
-    if (fwrite(&super_block, 1, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
-      error = SFS_CANT_WRITE_SUPER_BLOCK;
-      goto cleanup;
-    }
-
-    // write ...
-
-    // write ...
-  } else {
-    rewind(f);
-
-    // read header
-    if (fread(&header, 1L, sizeof(sfs_header), f) != sizeof(sfs_header)) {
-      error = SFS_CANT_READ_HEADER;
-      goto cleanup;
-    }
-
-    // validate header, maybe check version, don't know for now! TODO
-    if (header.h_format_magic_number != DEFAULT_HEADER.h_format_magic_number ||
-        header.h_block_size != DEFAULT_HEADER.h_block_size ||
-        header.h_filename_limit != DEFAULT_HEADER.h_filename_limit) {
-      error = SFS_CORRUPTED_HEADER;
-      goto cleanup;
-    }
-
-    // read superblock
-    if (fread(&super_block, 1L, sizeof(sfs_super_block), f) != sizeof(sfs_super_block)) {
-      error = SFS_CANT_READ_SUPER_BLOCK;
-      goto cleanup;
-    }
-
-    // validate super_block, don't know for now! HARD TODO
-    if (0) {
-      error = SFS_CORRUPTED_SUPER_BLOCK;
-      goto cleanup;
-    }
-
-    // read inode btree TODO
-
-    // read ...
-
-    // read ...
-  }
-
-  // fill obj
-  // obj->o_file.mf_fp = f;
-  // obj->o_file.mf_size = ftello(f);
-  // HARD TODO round up
-  // obj->o_file.mf_capacity = lround_up(obj->o_file.mf_size, header.h_block_size);
-  // obj->o_file.capacity = obj->o_file.size >= header.h_block_size ? obj->o_file.size : header.h_block_size;
-  // obj->o_file.mf_map = memory_map_object_file(obj->o_file.mf_fp, obj->o_file.mf_capacity);
-  // HARD TODO
-  // obj->o_file.capacity = 0;
-  // obj->o_file.memory = 0;
-
-  obj->o_header = header;
-  obj->o_super_block = super_block;
-
-  create_inode_block(obj);
-
-  error = SFS_OK;
-
-cleanup:
-  if (f != NULL) { fclose(f); }
-
-done:
-  return error;
+  // sfs_create_inode();
 }

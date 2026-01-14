@@ -14,6 +14,7 @@ typedef struct sfs_str {
   size_t len;
 
   /* memory size including the null terminator */
+  /* if len == size, then no null terminator at the end, e.g. slices */
   size_t size;
 } sfs_str;
 
@@ -196,7 +197,7 @@ typedef struct sfs_stats {
 
 } sfs_stats;
 
-typedef struct sfs_file {
+typedef struct sfs_fs_file {
   /* file pointer */
   int mf_fd;
 
@@ -222,7 +223,7 @@ typedef struct sfs_file {
 } sfs_fs_file;
 
 typedef struct sfs_object {
-  sfs_file o_file;
+  sfs_fs_file o_file;
 
   sfs_header o_header;
   sfs_super_block o_super_block;
@@ -233,35 +234,42 @@ typedef struct sfs_file {
 
 // ERROR CODES
 
-enum SFS_ERROR_CODES {
-  SFS_NOT_OK,
-  SFS_OK,
-  SFS_CANT_OPEN,
-  SFS_CANT_SEEK,
+#define SFS_GENERATE_ENUM(ENUM) ENUM,
+#define SFS_GENERATE_STRING(STRING) #STRING,
+#define SFS_FOR_EACH_ERROR_CODE(SFS_ERROR_CODE)                                                                        \
+  SFS_ERROR_CODE(SFS_NOT_OK)                                                                                           \
+  SFS_ERROR_CODE(SFS_OK)                                                                                               \
+  SFS_ERROR_CODE(SFS_CANT_OPEN)                                                                                        \
+  SFS_ERROR_CODE(SFS_CANT_SEEK)                                                                                        \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_FILE_CANT_CREATE)                                                                                 \
+  SFS_ERROR_CODE(SFS_FILE_CANT_STAT)                                                                                   \
+  SFS_ERROR_CODE(SFS_FILE_CANT_ALLOCATE_BUFFER)                                                                        \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_CANT_WRITE)                                                                                       \
+  SFS_ERROR_CODE(SFS_CANT_WRITE_HEADER)                                                                                \
+  SFS_ERROR_CODE(SFS_CANT_WRITE_SUPER_BLOCK)                                                                           \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_CANT_READ)                                                                                        \
+  SFS_ERROR_CODE(SFS_CANT_READ_HEADER)                                                                                 \
+  SFS_ERROR_CODE(SFS_CANT_READ_SUPER_BLOCK)                                                                            \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_CORRUPTED)                                                                                        \
+  SFS_ERROR_CODE(SFS_CORRUPTED_HEADER)                                                                                 \
+  SFS_ERROR_CODE(SFS_CORRUPTED_SUPER_BLOCK)                                                                            \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_INODE_NOT_EXIST)                                                                                  \
+  SFS_ERROR_CODE(SFS_INODE_CANT_CREATE)                                                                                \
+  SFS_ERROR_CODE(SFS_INODE_ALREADY_EXISTS)                                                                             \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_EXPECTED_DIR_FOUND_FILE)                                                                          \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_BAD_ARGUMENT)                                                                                     \
+                                                                                                                       \
+  SFS_ERROR_CODE(SFS_ERROR_COUNT)
 
-  // FILE ERROR
-  SFS_FILE_CANT_CREATE,
-  SFS_FILE_CANT_STAT,
-  SFS_FILE_CANT_ALLOCATE_BUFFER,
-
-  // WRITE ERROR
-  SFS_CANT_WRITE,
-  SFS_CANT_WRITE_HEADER,
-  SFS_CANT_WRITE_SUPER_BLOCK,
-
-  // READ ERROR
-  SFS_CANT_READ,
-  SFS_CANT_READ_HEADER,
-  SFS_CANT_READ_SUPER_BLOCK,
-
-  // CORRUPTED FIELDS
-  SFS_CORRUPTED,
-  SFS_CORRUPTED_HEADER,
-  SFS_CORRUPTED_SUPER_BLOCK,
-
-  // don't know what to name TODO
-  SFS_BAD_ARGUMENT,
-};
+enum SFS_ERROR_CODE { SFS_FOR_EACH_ERROR_CODE(SFS_GENERATE_ENUM) };
+static const char **SFS_ERROR_CODE_STRING = {SFS_FOR_EACH_ERROR_CODE(SFS_GENERATE_STRING)};
 
 // API
 
@@ -277,7 +285,7 @@ int sfs_compact(sfs_object *obj);
 sfs_stats sfs_get_stats(sfs_object *obj);
 
 // DIRECTORY API
-int sfs_mkdir(sfs_object *obj, const char *path);
+int sfs_mkdir(sfs_object *obj, sfs_str path, int recursive);
 int sfs_rmdir(sfs_object *obj, const char *path);
 int sfs_rmdir_inode(sfs_object *obj, sfs_inode_id inode);
 // add read dir, step dir TODO
