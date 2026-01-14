@@ -242,27 +242,39 @@ typedef struct sfs_file {
   SFS_ERROR_CODE(SFS_CANT_OPEN)                                                                                        \
   SFS_ERROR_CODE(SFS_CANT_SEEK)                                                                                        \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_FILE_ERRORS_BEGIN)                                                                                \
   SFS_ERROR_CODE(SFS_FILE_CANT_CREATE)                                                                                 \
   SFS_ERROR_CODE(SFS_FILE_CANT_STAT)                                                                                   \
   SFS_ERROR_CODE(SFS_FILE_CANT_ALLOCATE_BUFFER)                                                                        \
+  SFS_ERROR_CODE(SFS_FILE_ERRORS_END)                                                                                  \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_WRITE_ERRORS_BEGIN)                                                                               \
   SFS_ERROR_CODE(SFS_CANT_WRITE)                                                                                       \
   SFS_ERROR_CODE(SFS_CANT_WRITE_HEADER)                                                                                \
   SFS_ERROR_CODE(SFS_CANT_WRITE_SUPER_BLOCK)                                                                           \
+  SFS_ERROR_CODE(SFS_WRITE_ERRORS_END)                                                                                 \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_READ_ERRORS_BEGIN)                                                                                \
   SFS_ERROR_CODE(SFS_CANT_READ)                                                                                        \
   SFS_ERROR_CODE(SFS_CANT_READ_HEADER)                                                                                 \
   SFS_ERROR_CODE(SFS_CANT_READ_SUPER_BLOCK)                                                                            \
+  SFS_ERROR_CODE(SFS_READ_ERRORS_END)                                                                                  \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_CORRUPTED_ERRORS_BEGIN)                                                                           \
   SFS_ERROR_CODE(SFS_CORRUPTED)                                                                                        \
   SFS_ERROR_CODE(SFS_CORRUPTED_HEADER)                                                                                 \
   SFS_ERROR_CODE(SFS_CORRUPTED_SUPER_BLOCK)                                                                            \
+  SFS_ERROR_CODE(SFS_CORRUPTED_ERRORS_END)                                                                             \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_INODE_ERRORS_BEGIN)                                                                               \
   SFS_ERROR_CODE(SFS_INODE_NOT_EXIST)                                                                                  \
   SFS_ERROR_CODE(SFS_INODE_CANT_CREATE)                                                                                \
   SFS_ERROR_CODE(SFS_INODE_ALREADY_EXISTS)                                                                             \
+  SFS_ERROR_CODE(SFS_INODE_ERRORS_END)                                                                                 \
                                                                                                                        \
+  SFS_ERROR_CODE(SFS_DIR_ERRORS_BEGIN)                                                                                 \
   SFS_ERROR_CODE(SFS_EXPECTED_DIR_FOUND_FILE)                                                                          \
+  SFS_ERROR_CODE(SFS_DIR_ERRORS_END)                                                                                   \
                                                                                                                        \
   SFS_ERROR_CODE(SFS_BAD_ARGUMENT)                                                                                     \
                                                                                                                        \
